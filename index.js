@@ -42,7 +42,7 @@ bot.on("message", async (msg) => { // eslint-disable-line
 
     if (command === "help" || command == "cmd") {
         
-        msg.author.send(`$**{bot.user.username}** Commands:
+        msg.author.send(`**${bot.user.username}** Commands:
 
 __Music:__
 
