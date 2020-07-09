@@ -18,7 +18,13 @@ const queue = new Map();
 
 bot.on("warn", console.warn);
 bot.on("error", console.error);
-bot.on("ready", () => console.log(`${bot.user.tag} has been successfully turned on!`));
+bot.on('ready', () => {
+    console.log(`Created By: MAHIN`);
+    console.log(`Guilds: ${bot.guilds.size}`);
+    console.log(`Users: ${bot.users.size}`);
+    bot.user.setActivity(`${PREFIX}help | Free Music`,{type: 'Listening'});
+    
+});
 bot.on("shardDisconnect", (event, id) => console.log(`Shard ${id} disconnected (${event.code}) ${event}, trying to reconnect!`));
 bot.on("shardReconnecting", (id) => console.log(`Shard ${id} reconnecting...`));
 
@@ -35,17 +41,23 @@ bot.on("message", async (msg) => { // eslint-disable-line
     command = command.slice(PREFIX.length);
 
     if (command === "help" || command == "cmd") {
-        const helpembed = new Discord.MessageEmbed()
-            .setColor("#7289DA")
-            .setAuthor(bot.user.tag, bot.user.displayAvatarURL())
-            .setDescription(`
-__**Commands List**__
-> \`play\` > **\`play [title/url]\`**
-> \`search\` > **\`search [title]\`**
-> \`skip\`, \`stop\`,  \`pause\`, \`resume\`
-> \`nowplaying\`, \`queue\`, \`volume\``)
-            .setFooter("©️ 2020 Zealcord Development", "https://app.zealcord.xyz/assets/Logo.png");
-        msg.channel.send(helpembed);
+        
+        msg.author.send(`$**{bot.user.username}** Commands:
+
+__Music:__
+
+**r!play [title/url]** / **r!p [title/url]** : Launch An Audio Or Add It To The Queue.
+**r!resume** : Resume The Paused Audio.
+**r!queue** / **r!q** : Display The Queue.
+**r!skip** / **r!s** : Skip The Current Launched Audio.
+**r!nowplaying** / **r!np** : Display The Current Running Audio.
+**r!search [title/url]** / **r!sc [title/url]** : Search With The Title/Url on Youtube & Plays That .
+**r!pause** : Temporarily Stop The Audio.
+**r!stop** : Stop The Audio.
+**r!volume [number 1-100]** / **r!vol [number 1-100*]** : Adjust The Volume Level.
+**r!loop** : Repeat The Audio .
+
+For Any Kind Of Help Contact **MAHIN#9817**`).catch(error => msg.reply('**<a:BlinkingWarn:687593105758617603> Couldn\'t Send You The Help List, Please Open Your DM**'));
     }
     if (command === "play" || command === "p") {
         const voiceChannel = msg.member.voice.channel;
@@ -64,7 +76,7 @@ __**Commands List**__
                 const video2 = await youtube.getVideoByID(video.id); // eslint-disable-line no-await-in-loop
                 await handleVideo(video2, msg, voiceChannel, true); // eslint-disable-line no-await-in-loop
             }
-            return msg.channel.send(`<:yes:591629527571234819>  **|**  Playlist: **\`${playlist.title}\`** has been added to the queue!`);
+            return msg.channel.send(`<a:BlueCheckMark:700573350627639379>  **|**  Playlist: **\`${playlist.title}\`** has been added to the queue!`);
         } else {
             try {
                 var video = await youtube.getVideo(url);
@@ -98,7 +110,7 @@ __**Commands List**__
                 const video2 = await youtube.getVideoByID(video.id); // eslint-disable-line no-await-in-loop
                 await handleVideo(video2, msg, voiceChannel, true); // eslint-disable-line no-await-in-loop
             }
-            return msg.channel.send(`<:yes:591629527571234819>  **|**  Playlist: **\`${playlist.title}\`** has been added to the queue!`);
+            return msg.channel.send(`<a:BlueCheckMark:700573350627639379>  **|**  Playlist: **\`${playlist.title}\`** has been added to the queue!`);
         } else {
             try {
                 var video = await youtube.getVideo(url);
@@ -134,7 +146,7 @@ Please provide a value to select one of the search results ranging from 1-10.
             return handleVideo(video, msg, voiceChannel);
         }
 
-    } else if (command === "skip") {
+    } else if (command === "skip" || command === "s") {
         if (!msg.member.voice.channel) return msg.channel.send("I'm sorry but you need to be in a voice channel to play a music!");
         if (!serverQueue) return msg.channel.send("There is nothing playing that I could **\`skip\`** for you.");
         serverQueue.connection.dispatcher.end("Skip command has been used!");
@@ -154,11 +166,11 @@ Please provide a value to select one of the search results ranging from 1-10.
         if (isNaN(args[1]) || args[1] > 100) return msg.channel.send("Volume only can be set in range **1** - **100**.");
         serverQueue.volume = args[1];
         serverQueue.connection.dispatcher.setVolume(args[1] / 100);
-        return msg.channel.send(`I set the volume to: **\`${args[1]}%\`**`);
+        return msg.channel.send(`🔊 **|** I set the volume to: **\`${args[1]}%\`**`);
 
     } else if (command === "nowplaying" || command === "np") {
         if (!serverQueue) return msg.channel.send("There is nothing playing.");
-        return msg.channel.send(`🎶  **|**  Now Playing: **\`${serverQueue.songs[0].title}\`**`);
+        return msg.channel.send(`<a:NowPlaying:687593105804886092>  **|**  Now Playing: **\`${serverQueue.songs[0].title}\`**`);
 
     } else if (command === "queue" || command === "q") {
         if (!serverQueue) return msg.channel.send("There is nothing playing.");
@@ -227,7 +239,7 @@ async function handleVideo(video, msg, voiceChannel, playlist = false) {
     } else {
         serverQueue.songs.push(song);
         if (playlist) return;
-        else return msg.channel.send(`<:yes:591629527571234819>  **|** **\`${song.title}\`** has been added to the queue!`);
+        else return msg.channel.send(`<a:BlueCheckMark:700573350627639379>  **|** **\`${song.title}\`** has been added to the queue!`);
     }
     return;
 }
@@ -251,12 +263,7 @@ function play(guild, song) {
         .on("error", error => console.error(error));
     dispatcher.setVolume(serverQueue.volume / 100);
 
-    serverQueue.textChannel.send({
-        embed: {
-            color: "RANDOM",
-            description: `🎶  **|**  Start Playing: **\`${song.title}\`**`
-        }
-    });
+    serverQueue.textChannel.send(`<a:BlueCheckMark:700573350627639379>  **|**  Start Playing: **\`${song.title}\`**`)
 }
 
 bot.login(TOKEN);
